@@ -5,13 +5,17 @@ open System.Collections;
 
 System.Console.WriteLine("insert project folder, please")
 
-let path = System.Console.ReadLine()
+//let path = System.Console.ReadLine()
+// поставим заглушку
+let path = "D:\TestGeneration"
 
 System.Console.WriteLine("insert project package, please")
 
-let package = System.Console.ReadLine()
+//let package = System.Console.ReadLine()
+// поставим заглушку
+let package = "testTransition"
 
-// permissions register
+// реестр подключаемых расширений
 let permissions = new Hashtable()
 
 let writeToFile fn (str : string) =
@@ -42,7 +46,7 @@ let createImplementation form =
     else
         ignore(activities.Append("\n        <activity android:name=\"." + form + "\"></activity>"))
 
-    // imports register
+    // реестр библиотек
     let imports = new Hashtable()
 
     let currentImports = new System.Text.StringBuilder()
@@ -77,8 +81,13 @@ import android.view.View;\n"))
             let readerTrans = XmlReader.Create(path + @"\Transition2.xml")
             let id = reader.GetAttribute("android:id")
 
+            //!!!!!!!!!!!! как с этим бороться ????????????
+
             while ((readerTrans.Read()) && not (readerTrans.GetAttribute("id") = id )) do
                 ignore()
+
+            //!!!!!!!!!!!!!!!!!!! ???????????????
+
 
             let nextForm = readerTrans.GetAttribute("name_to")
 
