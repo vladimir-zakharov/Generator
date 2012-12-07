@@ -67,8 +67,8 @@ import android.view.View;\n")
     append activity ("\npublic class " + form + " extends Activity {")
 
     let reader = XmlReader.Create(path + @"\res\layout\" + form + ".xml")
-    while (reader.Read ()) do
-        if reader.Name = "Button" then
+    while (reader.Read ()) do match reader.Name with
+        |"Button" ->
             let onClickName = reader.GetAttribute("android:onClick")
 
             if not (imports.ContainsKey("android.content.Intent")) then 
@@ -89,7 +89,8 @@ import android.view.View;\n")
         Intent intent = new Intent(this, " + nextForm + ".class);
         startActivity(intent);")
             append activity "\n    }"
-        elif reader.Name = "WebView" then
+
+        |"WebView" ->
             if not (permissions.ContainsKey("Internet")) then 
                 append manifest "    <uses-permission android:name=\"android.permission.INTERNET\" />\n"
                 permissions.Add("Internet", "Internet")
@@ -101,13 +102,13 @@ import android.view.View;\n")
             append onCreate "\n        WebView webView = (WebView) findViewById(R.id.webViewInfo);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl(\"http://www.lanit-tercom.ru\");" // сайт зашит в код
-
+        |_ -> ()
     append onCreate "\n    }"
     append activity (onCreate.ToString())
 
     append activity "\n}"
 
-    insert activity 0 "package com.qrealclouds." + package + ";\n"
+    insert activity 0 ("package com.qrealclouds." + package + ";\n")
 
     writeToFile (path + @"\src\com\qrealclouds\" + package + "\\" + form + ".java") (activity.ToString())
 
