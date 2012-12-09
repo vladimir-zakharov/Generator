@@ -1,7 +1,9 @@
 ﻿open System.Xml
 open System.Xml.Linq
 open System.IO
-open System.Collections;
+open System.Collections
+open System.Diagnostics
+open System.Threading
 
 System.Console.WriteLine("insert project folder, please")
 
@@ -126,3 +128,10 @@ ignore(manifest.Append(activities.ToString()))
 ignore(manifest.Append("\n    </application>
 </manifest>"))
 writeToFile (path + "\AndroidManifest.xml") (manifest.ToString())
+
+let createBuildXml = "android update project --target 1 -p " + path
+Thread.Sleep(1000);
+let pathToAndroidSdk = @"D:\android-sdk\sdk\tools\" //для работы на другом компе нужно заменть до android-sdk
+ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + pathToAndroidSdk + createBuildXml))
+Thread.Sleep(1000);
+ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + "cd /d " + path + " & ant debug"))
