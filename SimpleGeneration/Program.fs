@@ -99,7 +99,7 @@ import android.view.View;\n"))
 
             ignore(onCreate.Append("\n        WebView webView = (WebView) findViewById(R.id.webViewInfo);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl(\"http://www.lanit-tercom.ru\");")) // сайт зашит в код
+        webView.loadUrl(\"http://www.lanit-tercom.ru\");")) // сайт зашит в код (было необходимо для теста)
 
     ignore(onCreate.Append("\n    }"))
     ignore(activity.Append(onCreate.ToString()))
@@ -131,7 +131,7 @@ writeToFile (path + "\AndroidManifest.xml") (manifest.ToString())
 
 let createBuildXml = "android update project --target 1 -p " + path
 Thread.Sleep(1000);
-let pathToAndroidSdk = @"D:\android-sdk\sdk\tools\" //для работы на другом компе нужно заменть до android-sdk
+let pathToAndroidSdk = @"D:\android-sdk\sdk\tools\" //для работы на другом компе нужно заменть путь до android sdk
 ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + pathToAndroidSdk + createBuildXml))
 Thread.Sleep(1000);
 ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + "cd /d " + path + " & ant debug"))
