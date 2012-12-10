@@ -101,9 +101,9 @@ import android.view.View;\n")
                 insert activity 0 "\nimport android.webkit.WebView;"
                 imports.Add("android.webkit.WebView", "android.webkit.WebView")
 
-            append onCreate "\n        WebView webView = (WebView) findViewById(R.id.webViewInfo);
+            append onCreate ("\n        WebView webView = (WebView) findViewById(R.id.webViewInfo);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl(\"http://www.lanit-tercom.ru\");")) // сайт зашит в код (было необходимо для теста)
+        webView.loadUrl(\"http://www.lanit-tercom.ru\");") // сайт зашит в код (было необходимо для теста)
         |_ -> ()
     append onCreate "\n    }"
     append activity (onCreate.ToString())
