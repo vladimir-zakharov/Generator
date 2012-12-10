@@ -1,7 +1,9 @@
 ﻿open System.Xml
 open System.Xml.Linq
 open System.IO
-open System.Collections;
+open System.Collections
+open System.Diagnostics
+open System.Threading
 
 System.Console.WriteLine("insert project folder, please")
 
@@ -101,7 +103,7 @@ import android.view.View;\n")
 
             append onCreate "\n        WebView webView = (WebView) findViewById(R.id.webViewInfo);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl(\"http://www.lanit-tercom.ru\");" // сайт зашит в код
+        webView.loadUrl(\"http://www.lanit-tercom.ru\");")) // сайт зашит в код (было необходимо для теста)
         |_ -> ()
     append onCreate "\n    }"
     append activity (onCreate.ToString())
@@ -130,3 +132,10 @@ append manifest (activities.ToString())
 append manifest ("\n    </application>
 </manifest>")
 writeToFile (path + "\AndroidManifest.xml") (manifest.ToString())
+
+let createBuildXml = "android update project --target 1 -p " + path
+Thread.Sleep(1000);
+let pathToAndroidSdk = @"D:\android-sdk\sdk\tools\" //для работы на другом компе нужно заменть путь до android sdk
+ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + pathToAndroidSdk + createBuildXml))
+Thread.Sleep(1000);
+ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + "cd /d " + path + " & ant debug"))
