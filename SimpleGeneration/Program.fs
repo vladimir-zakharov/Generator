@@ -116,15 +116,13 @@ import android.view.View;\n")
 
 ignore (System.IO.Directory.CreateDirectory(path + @"\src\com\qrealclouds\" + package))
 
-createImplementation "main" 
-createImplementation "second"
-createImplementation "third"
-createImplementation "fourth"
-createImplementation "fifth"
-createImplementation "sixth"
-createImplementation "seventh"
-createImplementation "eighth"
-createImplementation "ninth"
+let source = new DirectoryInfo(path + @"\res\layout")
+let listOffiles = source.GetFiles()
+
+for i in 0 .. listOffiles.Length - 1 do
+    let currentName = listOffiles.[i].Name
+    let length = currentName.Length
+    createImplementation(currentName.Substring(0, length - 4))
 
 append manifest ("\n    <application android:label=\"@string/app_name\"
         android:theme=\"@android:style/Theme.Light.NoTitleBar\">\n")
@@ -133,9 +131,12 @@ append manifest ("\n    </application>
 </manifest>")
 writeToFile (path + "\AndroidManifest.xml") (manifest.ToString())
 
-let createBuildXml = "android update project --target 1 -p " + path
-Thread.Sleep(1000);
-let pathToAndroidSdk = @"D:\android-sdk\sdk\tools\" //для работы на другом компе нужно заменть путь до android sdk
-ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + pathToAndroidSdk + createBuildXml))
-Thread.Sleep(1000);
-ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + "cd /d " + path + " & ant debug"))
+let createApk =
+    let createBuildXml = "android update project --target 1 -p " + path
+    Thread.Sleep(1000);
+    let pathToAndroidSdk = @"D:\android-sdk\sdk\tools\" //для работы на другом компе нужно заменть путь до android sdk
+    ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + pathToAndroidSdk + createBuildXml))
+    Thread.Sleep(1000);
+    ignore(System.Diagnostics.Process.Start("cmd.exe", "/C " + "cd /d " + path + " & ant debug"))
+
+createApk
