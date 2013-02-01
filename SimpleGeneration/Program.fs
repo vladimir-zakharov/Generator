@@ -24,6 +24,62 @@ let writeToFile fn (str : string) =
 let append (stringBuilder : System.Text.StringBuilder) (str : string) = ignore(stringBuilder.Append(str))
 let insert (stringBuilder : System.Text.StringBuilder) position (str : string) = ignore(stringBuilder.Insert(position, str))
 
+let transformXml (path : string) = 
+    let newXml = new System.Text.StringBuilder()
+
+    let reader = XmlReader.Create(path)
+    append newXml "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" 
+    ignore(reader.Read())
+    let mutable currentDepth = 0
+    let mutable hasAttr = false
+    while (reader.Read()) do
+        let depth = reader.Depth
+
+        if hasAttr then
+            if (currentDepth < depth) then
+                append newXml " >\n"
+            else
+                append newXml " />\n"
+
+        currentDepth <- depth
+
+        for i in 1..depth do
+            append newXml "    "
+        let name = reader.Name
+        let amount = reader.AttributeCount
+
+        match amount with
+        | 0 -> hasAttr <- false
+        | _ -> hasAttr <- true
+
+        if name <> "" then 
+            if not hasAttr then 
+                append newXml ("</" + name + ">" + "\n")
+            else
+                append newXml ("<" + name + "\n")
+        else
+            append newXml (name + "\n")
+
+        for i in 0..amount - 1 do
+            for i in 0..depth do
+                append newXml "    "
+            reader.MoveToAttribute(i)
+            let name = reader.Name
+            match name with
+            |"xmlns" ->
+                if i = amount - 1 then 
+                    append newXml (reader.Name + ":android" + "=" + "\"" + reader.Value + "\"")
+                else 
+                    append newXml (reader.Name + ":android" + "=" + "\"" + reader.Value + "\"" + "\n")
+            |_ ->
+                if i = amount - 1 then 
+                    append newXml ("android:" + reader.Name + "=" + "\"" + reader.Value + "\"")
+                else
+                    append newXml ("android:" + reader.Name + "=" + "\"" + reader.Value + "\"" + "\n")
+    reader.Close()
+    writeToFile path (newXml.ToString())
+    
+
 let activities = new System.Text.StringBuilder()
 
 let manifest = new System.Text.StringBuilder()
@@ -69,7 +125,8 @@ import android.view.View;\n")
     append activity ("\npublic class " + form + " extends Activity {")
 
     let reader = XmlReader.Create(path + @"\res\layout\" + form + ".xml")
-    while (reader.Read ()) do match reader.Name with
+    while (reader.Read ()) do 
+        match reader.Name with
         |"Button" ->
             let onClickName = reader.GetAttribute("android:onClick")
 
@@ -121,6 +178,7 @@ let listOffiles = source.GetFiles()
 
 for i in 0 .. listOffiles.Length - 1 do
     let currentName = listOffiles.[i].Name
+    transformXml listOffiles.[i].FullName
     let length = currentName.Length
     createImplementation(currentName.Substring(0, length - 4))
 
