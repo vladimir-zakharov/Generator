@@ -140,21 +140,20 @@ import android.view.View;\n"
         | "Button" ->
             let onClickName = reader.GetAttribute "android:onClick"
             let id = reader.GetAttribute "android:id"
+            append activity <| "\n\n    public void " + onClickName + "(View v) {"
 
             if (transitions.ContainsKey id) then     
                 if not (imports.ContainsKey("android.content.Intent")) then 
                     insert activity "\nimport android.content.Intent;"
                     imports.Add("android.content.Intent", "android.content.Intent")
 
-                append activity <| "\n\n    public void " + onClickName + "(View v) {"
-
                 let nextForm = first ((transitions.Item id) :?> string * string * string)
 
                 append activity <| "
             Intent intent = new Intent(this, " + nextForm + ".class);
             startActivity(intent);"
-                append activity "\n    }"
             else ()
+            append activity "\n    }"
 
         | "WebView" ->
             if not (permissions.ContainsKey("Internet")) then 
@@ -202,7 +201,7 @@ let createApk =
     System.Threading.Thread.Sleep(1000);
     let pathToAndroidSdk = @"D:\android-sdk\sdk\tools\" //для работы на другом компе нужно заменть путь до android sdk
     System.Diagnostics.Process.Start("cmd.exe", "/C " + pathToAndroidSdk + createBuildXml) |> ignore
-    System.Threading.Thread.Sleep(1000);
+    System.Threading.Thread.Sleep(3000);
     System.Diagnostics.Process.Start("cmd.exe", "/C " + "cd /d " + path + " & ant debug") |> ignore
 
 createApk
