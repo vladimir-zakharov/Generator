@@ -69,6 +69,23 @@ let transformXml (path : string) =
 
     reader.Close()
     writeToFile path (newXml.ToString())
+
+let getTransitions = 
+    let transitions = new Hashtable()
+    let readerTrans = XmlReader.Create(path + @"\Transition2.xml")
+    while readerTrans.Read() do 
+        match readerTrans.Name with
+        | "Button" | "WebView" ->
+        let attributes = (readerTrans.GetAttribute("name_to"), readerTrans.GetAttribute("name_from"), readerTrans.GetAttribute("action"))
+        transitions.Add(readerTrans.GetAttribute("id"), attributes)
+        | _ -> ()
+    transitions
+
+let first (a, _, _) = a
+let second (_, b, _) = b
+let third (_, _, c) = c
+    
+let transitions = getTransitions
     
 // permissions register
 let permissions = new Hashtable()
@@ -122,25 +139,22 @@ import android.view.View;\n"
         match reader.Name with
         | "Button" ->
             let onClickName = reader.GetAttribute "android:onClick"
-
-            if not (imports.ContainsKey("android.content.Intent")) then 
-                insert activity "\nimport android.content.Intent;"
-                imports.Add("android.content.Intent", "android.content.Intent")
-
-            append activity <| "\n\n    public void " + onClickName + "(View v) {"
-
-            let readerTrans = XmlReader.Create(path + @"\Transition2.xml")
             let id = reader.GetAttribute "android:id"
 
-            while ((readerTrans.Read()) && not (readerTrans.GetAttribute("id") = id )) do
-                ignore()
+            if (transitions.ContainsKey id) then     
+                if not (imports.ContainsKey("android.content.Intent")) then 
+                    insert activity "\nimport android.content.Intent;"
+                    imports.Add("android.content.Intent", "android.content.Intent")
 
-            let nextForm = readerTrans.GetAttribute "name_to"
+                append activity <| "\n\n    public void " + onClickName + "(View v) {"
 
-            append activity <| "
-        Intent intent = new Intent(this, " + nextForm + ".class);
-        startActivity(intent);"
-            append activity "\n    }"
+                let nextForm = first ((transitions.Item id) :?> string * string * string)
+
+                append activity <| "
+            Intent intent = new Intent(this, " + nextForm + ".class);
+            startActivity(intent);"
+                append activity "\n    }"
+            else ()
 
         | "WebView" ->
             if not (permissions.ContainsKey("Internet")) then 
